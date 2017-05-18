@@ -1,3 +1,8 @@
+
+"since  2017/5/18
+"anthor wu
+"ver    1.0
+
 """""""""""""""""Vundle""""""""""""""""""
 set nocompatible              " be iMproved, required
 "filetype off                  " required
