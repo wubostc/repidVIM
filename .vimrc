@@ -8,43 +8,38 @@ call vundle#begin()
 " alternatively, pass a path where Vundle should install plugins
 "call vundle#begin('~/some/path/here')
 
-" let Vundle manage Vundle, required
+"-------------------Common------------------------------
 Plugin 'VundleVim/Vundle.vim'
-
-
 "--vim-airline
 Plugin 'vim-airline/vim-airline'
 "vim-airline-themes
 Plugin 'vim-airline/vim-airline-themes'
+"-------------------Common------------------------------
 
-"--NERDTree
-Plugin 'https://github.com/scrooloose/nerdtree.git'
 
-"--NERDCommenter
-Plugin 'https://github.com/scrooloose/nerdcommenter.git'
+"-------------------Explorer------------------------------
+"Allows you to explore your filesystem and to open files and directories.
+Plugin 'scrooloose/nerdtree'
+"-------------------Explorer------------------------------
 
 "--tagbar
 Plugin 'https://github.com/majutsushi/tagbar'
 
-"-------------------cpp------------------------------
+"-------------------CPP------------------------------
 "--YCM
 "Plugin 'Valloric/YouCompleteMe'
 "--cpp14语法高亮
 Plugin 'octol/vim-cpp-enhanced-highlight'
 " STL-Syntax
 Plugin 'Mizuchi/STL-Syntax'
-"-------------------cpp------------------------------
-"--vim-fswitch
+"This Vim plugin will help switching between companion files (e.g. ".h" and ".cpp" files)
 Plugin 'derekwyatt/vim-fswitch'
+"-------------------CPP------------------------------
 
-"--auto-pairs--自动加上可以成对的符号
-Plugin 'https://github.com/jiangmiao/auto-pairs'
 
 "--ctrlsf--内容查找 requier installed ag or ack
 "Plugin 'dyng/ctrlsf.vim'
 
-"--undotree--撤销管理
-Plugin 'https://github.com/mbbill/undotree'
 
 "--vim-easymotion
 "Plugin 'https://github.com/easymotion/vim-easymotion'
@@ -56,8 +51,6 @@ Plugin 'https://github.com/mbbill/undotree'
 "--快速替换
 Plugin 'terryma/vim-multiple-cursors'
 
-" 显示代码尾部空格
-Plugin 'vim-scripts/ShowTrailingWhitespace'
 
 "-------------------html+css------------------------------
 " HTML5 + inline SVG omnicomplete function, indent and syntax for Vim.
@@ -72,24 +65,25 @@ Plugin 'gko/vim-coloresque'
 Plugin 'Valloric/MatchTagAlways'
 "-------------------html+css------------------------------
 
+"-------------------JSON------------------------------
 " vim-json
 Plugin 'elzr/vim-json'
+"-------------------JSON------------------------------
 
 
-
-"-------------------php------------------------------
+"-------------------PHP------------------------------
 " Improved PHP omni-completion. Based on the default phpcomplete.vim.
 Plugin 'shawncplus/phpcomplete.vim'
 " Up-to-date PHP syntax file(5.3-7.1 support) 
 Plugin 'StanAngeloff/php.vim'
-"-------------------php------------------------------
+"-------------------PHP------------------------------
 
 
 "-------------------Javascript------------------------------
 " Enhanced JavaScript Syntax for Vim
 "Plugin 'jelera/vim-javascript-syntax'
 " Javascript indenter (HTML indent is included)
-"Plugin 'vim-scripts/JavaScript-Indent'
+Plugin 'vim-scripts/JavaScript-Indent'
 "provides syntax highlighting and improved indentation.
 Plugin 'pangloss/vim-javascript'
 "Syntax file for JavaScript libraries.
@@ -100,24 +94,33 @@ Plugin 'heavenshell/vim-jsdoc'
 Plugin 'ternjs/tern_for_vim'
 "-------------------Javascript------------------------------
 
-"-------------------code analysis tool------------------------------
+"-------------------Code analysis tool------------------------------
 Plugin 'w0rp/ale'
-"-------------------code analysis tool------------------------------
+"-------------------Code analysis tool------------------------------
 
 
-
-"平滑滚动
+"-------------------Easily use------------------------------
+"--undotree--撤销管理
+Plugin 'https://github.com/mbbill/undotree'
+"Smooth scrolling(<c-u> <c-d>)
 Plugin 'terryma/vim-smooth-scroll'
+"Adds file type glyphs/icons to popular Vim plugins.
+Plugin 'ryanoasis/vim-devicons'
+"Insert or delete brackets, parens, quotes in pair.
+Plugin 'jiangmiao/auto-pairs'
+"A simple, easy-to-use Vim alignment plugin.
+"Plugin 'junegunn/vim-easy-align'
+" 显示代码尾部空格
+Plugin 'vim-scripts/ShowTrailingWhitespace'
+"--NERDCommenter
+Plugin 'https://github.com/scrooloose/nerdcommenter.git'
+"-------------------Easily use------------------------------
+
 
 """""""""Color Scheme""""""""""
-
-"--molokai
-Plugin 'https://github.com/tomasr/molokai'
-
 "Collection of awesome color schemes for Vim, merged for quick use.
 Plugin 'rafi/awesome-vim-colorschemes'
-
-Plugin 'romainl/flattened'
+"""""""""Color Scheme""""""""""
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -221,13 +224,13 @@ set showmode		    	" 命令行显示vim当前模式
 set incsearch		    	" 输入字符串就显示匹配点
 set hlsearch            	" 高亮显示搜索结果
 
-" Vim 内部使用的字符编码方式，包括 Vim 的 buffer (缓冲区)、菜单文本、消息文本等
+" Vim 内部使用的字符编码方式
 set encoding=UTF-8
 
 " 设置文件读取格式
 "set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,latin1
-set fileencodings=ucs-bom,utf-8,gb18030,default,latin1
-
+"set fileencodings=ucs-bom,utf-8,gb18030,default,latin1
+set fileencodings=utf-8,ucs-bom,cp936,gb18030,big5,euc-jp,euc-kr,latin1
 
 " 高亮显示当前行列
 set cursorline
@@ -242,6 +245,7 @@ set backspace=indent,eol,start
 
 set cmdheight=2
 
+set modeline
 
 " 设置快捷键将选中文本块复制至系统剪贴板
 noremap <Leader>y "+y
@@ -257,12 +261,12 @@ nnoremap <Leader>w :w<CR>
 nnoremap <Leader>W :w !sudo tee %<CR>
 " 保存并退出当前窗口
 nnoremap <Leader>x :x<CR>
-"
+" 快速切换标签
 nnoremap <Leader><tab> :tabnext<CR>
 
 
 " 让配置变更立即生效
-autocmd BufWritePost $MYVIMRC source $MYVIMRC
+"autocmd BufWritePost $MYVIMRC source $MYVIMRC
 
 " 设置 gf (文件跳转)路径
 set path+=/usr/include
@@ -307,7 +311,6 @@ let g:ycm_confirm_extra_conf = 1
 " 全能补全和路径补全
 inoremap <C-j> <C-x><C-o>
 "inoremap <C-k> <C-x><C-i>
-
 
 " 语法关键字补全
 let g:ycm_seed_identifiers_with_syntax = 1
@@ -389,25 +392,23 @@ let g:airline_theme='cobalt2'
 " open a NERDTree automatically when vim starts up
 "autocmd VimEnter * NERDTree
 
-" How can I open a NERDTree automatically when vim starts up if no files were specified?
-"autocmd StdinReadPre * let s:std_in=1
-"autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
-
 " open/close the NERDTree with F2
 nnoremap <F2> :NERDTreeToggle<CR>
 "inoremap <F2> <Esc> :NERDTreeToggle<CR>
 
 "" bookmarks
-"let NERDTreeShowBookmarks = 1
+let g:NERDTreeShowBookmarks = 1
 
 "" hidden of files
 "let NERDTreeShowHidden = 1
 
 " NERDTree 子窗口中不显示冗余帮助信息和书签
-let NERDTreeMinimalUI = 1
+let g:NERDTreeMinimalUI = 1
 
-" you know
-let NERDTreeWinSize = 30
+let g:NERDTreeWinSize = 30
+let g:NERDTreeWinPos = 'left'
+
+let g:NERDTreeShowLineNumbers = 1
 """"""""""""""NERDTree"""""""""""""""
 
 
@@ -473,25 +474,8 @@ let g:tagbar_type_cpp = {
 """"""""""""""""""tagbar""""""""""""
 
 
-
-""""""""""""""""indent-guides""""""""""""
-" you know
-let g:indent_guides_enable_on_vim_startup = 0
-
-" NOTE: This option only works for soft-tabs (spaces) and not hard-tabs.
-let g:indent_guides_guide_size = 1
-
-" 从第二层开始可视化显示缩进
-let g:indent_guides_start_level = 2
-
-" 快捷键 <\>i 开/关缩进可视化
-nmap <silent> <Leader>i :IndentGuidesToggle<CR>
-""""""""""""""""indent-guides""""""""""""
-
-
-
 """""""""""""""""""fswitch"""""""""""""""""""
-" *.cpp 和 *.h 间切换
+"Switch to the file and load it into the current window.(*.cpp *.h)
 nmap <silent> <Leader>ch :FSHere<CR>
 """""""""""""""""""fswitch"""""""""""""""""""
 
@@ -502,7 +486,6 @@ nmap <silent> <Leader>ch :FSHere<CR>
 " or:
 let g:ackprg = 'ag --vimgrep'
 """"""""""""""""""""""ag"""""""""""""""""""
-
 
 
 """""""""""""""""""""ctrlsf""""""""""""""""
@@ -549,7 +532,6 @@ inoremap <F3> <Esc> :UndotreeToggle<CR>
 
 
 
-
 """""""""""""""easymotion""""""""""""""""
 " Disable default mappings
 "let g:EasyMotion_do_mapping = 0
@@ -592,33 +574,6 @@ nnoremap <leader>t :%s/\s\+$//<cr>:let @/=''<cr>
 """"""""""""""""去掉行尾空格"""""""""""""""""""
 
 
-
-"""""""""""""vimfiler""""""""""""""""
-"Normal mode default mappings.
-" g?    help
-" gg    top
-" ge    open explorer
-" j     down
-" k     up
-" l     entry
-" h     leave
-" <C-l>     redraw screen
-" <Sapce>   toggle_mark_current_line
-" *         toggle_mark_all_line
-" c     copy file
-" m     move file
-" d     del file
-" r     rename file
-" K     mkdir
-
-"let g:vimfiler_as_default_explorer = 1
-
-
-"nnoremap <F2> :VimFilerCurrentDir<CR>
-
-"""""""""""""vimfiler""""""""""""""""
-
-
 """""""""""""vim-json""""""""""""""""
 let g:vim_json_syntax_conceal = 1
 let g:vim_json_warnings=1
@@ -628,13 +583,10 @@ let g:vim_json_warnings=1
 """""""""""""html5""""""""""""""""
 "event-handler attributes support:
 let g:html5_event_handler_attributes_complete = 1
-
 "RDFa attributes support:
 let g:html5_rdfa_attributes_complete = 1
-
 "microdata attributes support:
 let g:html5_microdata_attributes_complete = 1
-
 "WAI-ARIA attribute support:
 let g:html5_aria_attributes_complete = 1
 """""""""""""html5""""""""""""""""
@@ -660,7 +612,6 @@ let g:html5_aria_attributes_complete = 1
 "Ramda: ramda
 "Vue.js: vue
 "d3.js: d3
-"Default lib set is: jquery,underscore,backbone
 let g:used_javascript_libs = 'jquery,angularjs,angularui,angularuirouter,vue'
 
 """""""""""""javascript-libraries-syntax""""""""""""""""
@@ -853,18 +804,18 @@ noremap <silent> <c-d> :call smooth_scroll#down(&scroll, 0, 2)<CR>
 "noremap <silent> <c-f> :call smooth_scroll#down(&scroll*2, 0, 4)<CR>
 """"""""""""""vim-smooth-scroll"""""""""""""""
 
+""""""""""""""vim-devicons"""""""""""""""
+"for vim-airline
+let g:airline_powerline_fonts = 1
+""""""""""""""vim-devicons"""""""""""""""
+
 
 """""""""""""Theme""""""""""""""""
-
 "--molokai
 "colorscheme molokai
 "let g:rehash256 = 1
-" If you prefer the scheme to match the original monokai background color, put
-" this in your .vimrc file:
 "let g:molokai_original = 1
 
-
-"""""""""""""""""""""""""""""""""""
 "set t_Co=256   " This is may or may not needed.
 "set background=light
 "colorscheme PaperColor
@@ -887,5 +838,4 @@ if (has("termguicolors"))
 set termguicolors
 endif
 colorscheme solarized8_dark
-"""""""""""""""""""""""""""""""""""
 """""""""""""Theme""""""""""""""""

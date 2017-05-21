@@ -1,0 +1,24 @@
+{
+    "libs": [
+        "browser",
+        "chai",
+        "ecma5",
+        "ecma6",
+        "jquery",
+        "underscore"
+    ],
+    "loadEagerly": [
+        "importantfile.js"
+    ],
+    "plugins": {
+        "angular":{},
+        "node":{},
+        "complete_strings":{},
+        "modules":{},
+        "es_modules":{},
+        "requirejs": {
+            "baseURL": "./",
+            "paths": {}
+        }
+    }
+}
