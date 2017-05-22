@@ -1,0 +1,3 @@
+{
+    "extends":"/usr/local/node-v7.10.0-linux-x64/lib/node_modules/stylelint-config-standard/index.js"
+}

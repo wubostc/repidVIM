@@ -8,26 +8,37 @@ call vundle#begin()
 " alternatively, pass a path where Vundle should install plugins
 "call vundle#begin('~/some/path/here')
 
-"-------------------Common------------------------------
 Plugin 'VundleVim/Vundle.vim'
+
+"-------------------Status line------------------------------
 "--vim-airline
 Plugin 'vim-airline/vim-airline'
 "vim-airline-themes
 Plugin 'vim-airline/vim-airline-themes'
-"-------------------Common------------------------------
+"-------------------Status line------------------------------
 
 
-"-------------------Explorer------------------------------
-"Allows you to explore your filesystem and to open files and directories.
-Plugin 'scrooloose/nerdtree'
-"-------------------Explorer------------------------------
+"-------------------Code Completion------------------------------
+"currently supported languages, look at the following.
+"C          ->      clang
+"C++        ->      clang
+"JavaScript ->      tern_for_vim
+"PHP        ->      phpcomplete.vim
+Plugin 'Valloric/YouCompleteMe'
+"-------------------Code Completion------------------------------
 
-"--tagbar
-Plugin 'https://github.com/majutsushi/tagbar'
+"-------------------Code analysis------------------------------
+"Asynchronous Lint Engine(the current analysis engine).
+"C          ->      clang
+"C++        ->      clang
+"CSS        ->      stylelint
+"HTML       ->      HTMLHint
+"JavaScript ->      eslint
+"Shell      ->      shellcheck
+Plugin 'w0rp/ale'
+"-------------------Code analysis------------------------------
 
 "-------------------CPP------------------------------
-"--YCM
-"Plugin 'Valloric/YouCompleteMe'
 "--cpp14语法高亮
 Plugin 'octol/vim-cpp-enhanced-highlight'
 " STL-Syntax
@@ -35,8 +46,6 @@ Plugin 'Mizuchi/STL-Syntax'
 "This Vim plugin will help switching between companion files (e.g. ".h" and ".cpp" files)
 Plugin 'derekwyatt/vim-fswitch'
 "-------------------CPP------------------------------
-
-
 "--ctrlsf--内容查找 requier installed ag or ack
 "Plugin 'dyng/ctrlsf.vim'
 
@@ -51,6 +60,8 @@ Plugin 'derekwyatt/vim-fswitch'
 "--快速替换
 Plugin 'terryma/vim-multiple-cursors'
 
+"--tagbar
+Plugin 'https://github.com/majutsushi/tagbar'
 
 "-------------------html+css------------------------------
 " HTML5 + inline SVG omnicomplete function, indent and syntax for Vim.
@@ -74,15 +85,13 @@ Plugin 'elzr/vim-json'
 "-------------------PHP------------------------------
 " Improved PHP omni-completion. Based on the default phpcomplete.vim.
 Plugin 'shawncplus/phpcomplete.vim'
-" Up-to-date PHP syntax file(5.3-7.1 support) 
+" Up-to-date PHP syntax file(5.3-7.1 support)
 Plugin 'StanAngeloff/php.vim'
 "-------------------PHP------------------------------
 
 
 "-------------------Javascript------------------------------
-" Enhanced JavaScript Syntax for Vim
-"Plugin 'jelera/vim-javascript-syntax'
-" Javascript indenter (HTML indent is included)
+"Javascript indenter (HTML indent is included)
 Plugin 'vim-scripts/JavaScript-Indent'
 "provides syntax highlighting and improved indentation.
 Plugin 'pangloss/vim-javascript'
@@ -94,9 +103,6 @@ Plugin 'heavenshell/vim-jsdoc'
 Plugin 'ternjs/tern_for_vim'
 "-------------------Javascript------------------------------
 
-"-------------------Code analysis tool------------------------------
-Plugin 'w0rp/ale'
-"-------------------Code analysis tool------------------------------
 
 
 "-------------------Easily use------------------------------
@@ -116,11 +122,16 @@ Plugin 'vim-scripts/ShowTrailingWhitespace'
 Plugin 'https://github.com/scrooloose/nerdcommenter.git'
 "-------------------Easily use------------------------------
 
+"-------------------Explorer------------------------------
+"Allows you to explore your filesystem and to open files and directories.
+Plugin 'scrooloose/nerdtree'
+"-------------------Explorer------------------------------
 
-"""""""""Color Scheme""""""""""
+
+"-------------------Color Scheme------------------------------
 "Collection of awesome color schemes for Vim, merged for quick use.
 Plugin 'rafi/awesome-vim-colorschemes'
-"""""""""Color Scheme""""""""""
+"-------------------Color Scheme------------------------------
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -145,15 +156,11 @@ let g:ale_echo_msg_error_str = 'E'
 let g:ale_echo_msg_warning_str = 'W'
 let g:ale_statusline_format = ['✘ %d', '⚠ %d', '⬥ ok']
 
-"htmlhint eslint stylelint ... all on bash
-"let g:ale_html_htmlhint_use_global = 1
 let g:ale_html_htmlhint_executable = 'htmlhint'
 
-"let g:ale_javascript_eslint_use_global = 1
 let g:ale_javascript_eslint_executable = 'eslint'
 
-"let g:ale_css_stylelint_use_global = 1
-let g:ale_css_stylelint_executable = 'stylelint' 
+let g:ale_css_stylelint_executable = 'stylelint'
 
 "let g:ale_cpp_gcc_options = '-std=c++14 -Wall'
 let g:ale_cpp_clang_options = '-std=c++14 -Wall'
@@ -161,8 +168,15 @@ let g:ale_cpp_clang_options = '-std=c++14 -Wall'
 "let g:ale_c_gcc_options = '-std=c11 -Wall'
 let g:ale_c_clang_options = '-std=c11 -Wall'
 
+"Installing:
+"   apt-get install shellcheck
+"let b:ale_sh_shellcheck_exclusions = 'SC2034,SC2154,SC2164'
+let g:ale_sh_shellcheck_executable = 'shellcheck'
 
 
+"Installing:
+"   apt-get install vim-vint
+let g:ale_vim_vint_show_style_issues = 1
 """""""""""""""""ale""""""""""""""""""
 
 """""""""""""""""""vim"""""""""""""""""""
@@ -195,7 +209,7 @@ set showmatch		    	" 设置匹配模式，显示匹配的括号
 set linebreak		    	" 整词换行
 set whichwrap=b,s,<,>,[,]	" 光标从行首和行末时可以跳到另一行去
 "set hidden             	" Hide buffers when they are abandoned
-set mouse=a 		    	" Enable mouse usage (all modes)    "使用鼠标
+set mouse=a 		    	" Enable mouse usage (all modes)
 set number	    	    	" 显示行号
 "set previewwindow	    	" 标识预览窗口
 set history=50		    	" set command history to 200
@@ -247,22 +261,22 @@ set cmdheight=2
 
 set modeline
 
-" 设置快捷键将选中文本块复制至系统剪贴板
+"use clipboard to copy and paste
 noremap <Leader>y "+y
-
-" 设置快捷键将系统剪贴板内容粘贴至 vim, 并移动光标到内容最后
 noremap <Leader>p "+gp
 
-" 定义快捷键关闭当前分割窗口
+"exit the VIM window
 nnoremap <Leader>q :q<CR>
-" 定义快捷键保存当前窗口内容
+"save the file
 nnoremap <Leader>w :w<CR>
-" 强行保存只读文件
+"force save
 nnoremap <Leader>W :w !sudo tee %<CR>
-" 保存并退出当前窗口
+"save the file then exit 
 nnoremap <Leader>x :x<CR>
-" 快速切换标签
+"Quickly switch labels
 nnoremap <Leader><tab> :tabnext<CR>
+"fast indentation
+nnoremap <Space> i<Space><Esc>l
 
 
 " 让配置变更立即生效
@@ -632,34 +646,51 @@ let g:user_emmet_leader_key='<C-y>'
 
 
 let g:user_emmet_settings = {
-  \    'indentation' :  '   ',
-  \    'variables' : {
-  \        'lang' : 'zh',
-  \    },
-  \    'html' : {
-  \        'filters' : 'html',
-  \        'expandos' : {
-  \            'ol': 'ol>li',
-  \            'list': 'ul>li*3',
-  \            'details':   'details>summary',
-  \        },
-  \        'default_attributes': {
-  \            'a': {'href': ''},
-\               'meta': [{'name':'viewport'},{'content':'width=device-width, initial-scale=1.0'}],
-  \            'link': [{'rel': 'stylesheet'}, {'href': ''}],
-  \            'script':    {'type': 'javascript'},           
-  \        },
-  \        'aliases': {
-  \            'bq': 'blockquote',
-  \            'obj': 'object',
-  \            'src': 'source',
-  \        },
-  \        'empty_elements': 'area,base,basefont,isindex,link,meta,br',
-  \        'block_elements': 'address,applet,blockquote,li,link,map',
-  \        'inline_elements': 'a,abbr,acronym',
-  \        'empty_element_suffix': '>',
-  \    },
-  \}
+\    'variables' : {
+\         'lang': 'zh',
+\         'charset': 'UTF-8',
+\         'newline': '\n',
+\    },
+\    'indentation': '    ',
+\    'html' : {
+\         'snippets': {
+\            'cc:ie': "<!--[if IE]>\n\t${child}|\n<![endif]-->",
+\            'cc:noie': "<!--[if !IE]><!-->\n\t${child}|\n<!--<![endif]-->",
+\            'html:5': "<!DOCTYPE html>\n"
+\                     ."<html lang=\"${lang}\">\n"
+\                     ."<head>\n"
+\                     ."\t<meta charset=\"UTF-8\">\n"
+\                     ."\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+\                     ."\t<title>todo</title>\n"
+\                     ."</head>\n"
+\                     ."<body>\n"
+\                     ."\t${child}|\n"
+\                     ."</body>\n"
+\                     ."</html>",
+\        },
+\        'expandos' : {
+\            'ol': 'ol>li',
+\            'list': 'ul>li*3',
+\            'details': 'details>summary',
+\        },
+\        'default_attributes': {
+\            'a': {'href': ''},
+\            'meta': [{'name': 'viewport'},{'content': 'width=device-width, initial-scale=1.0'}],
+\            'link': [{'rel': 'stylesheet'}, {'href': ''}],
+\            'script':    {'type': 'text/javascript'},
+\            'img': [{'src': ''}, {'alt': 'loading'}],
+\        },
+\        'aliases': {
+\            'bq': 'blockquote',
+\            'obj': 'object',
+\            'src': 'source',
+\        },
+\        'empty_elements': 'area,base,basefont,isindex,link,meta,br,input',
+\        'block_elements': 'address,applet,blockquote,li,link,map',
+\        'inline_elements': 'a,abbr,acronym',
+\        'empty_element_suffix': ' />',
+\    },
+\}
 
 """""""""""""emmet-vim""""""""""""""""
 
@@ -810,6 +841,10 @@ let g:airline_powerline_fonts = 1
 """"""""""""""vim-devicons"""""""""""""""
 
 
+
+"-------------------Shell------------------------------
+"a static analysis tool for shell scripts
+"-------------------Shell------------------------------
 """""""""""""Theme""""""""""""""""
 "--molokai
 "colorscheme molokai
