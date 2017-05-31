@@ -286,6 +286,25 @@ nnoremap <Space> i<Space><Esc>l
 set path+=/usr/include
 set path+=/usr/include/x86_64-linux-gnu
 set path+=/usr/include/c++/5
+
+
+autocmd BufNewFile *.sh,*.js exec ":call AutoSetFileHead()"
+function AutoSetFileHead()
+
+    if &filetype == 'sh'
+        call setline(1, "\#!/bin/bash")
+    endif
+
+    if &filetype == 'js'
+        call setline(1, "\"use strict\"")
+    endif
+
+    normal G
+    normal o
+    normal o
+
+endfunc
+
 """""""""""""""""""vim"""""""""""""""""""
 
 
