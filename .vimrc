@@ -1,4 +1,11 @@
-"""""""""""""""""Vundle""""""""""""""""""
+"==========================================
+" Link: https://github.com/wubostc/repidVIM
+" Author: wubostc
+" Version: beta
+" Email: 913721086@qq.com
+" Desc:
+"==========================================
+
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
@@ -185,11 +192,8 @@ let g:ale_vim_vint_show_style_issues = 1
 " 允许用指定语法高亮配色方案替换默认方案
 syntax on
 
-" detect file type
 filetype on
-" for NERDCommenter
 filetype plugin on
-
 filetype plugin indent on
 
 " 语法提示支持c++11
@@ -271,13 +275,18 @@ nnoremap <Leader>q :q<CR>
 nnoremap <Leader>w :w<CR>
 "force save
 nnoremap <Leader>W :w !sudo tee %<CR>
-"save the file then exit 
+"save the file then exit
 nnoremap <Leader>x :x<CR>
 "Quickly switch labels
 nnoremap <Leader><tab> :tabnext<CR>
 "fast indentation
 nnoremap <Space> i<Space><Esc>l
 
+
+"tabnew && buffer
+nnoremap <C-t> :tabnew<CR>
+nnoremap <Leader><tab> :tabnext<CR>
+nnoremap <Leader><Leader><Tab> :bnext<CR>
 
 " 让配置变更立即生效
 "autocmd BufWritePost $MYVIMRC source $MYVIMRC
@@ -288,9 +297,7 @@ set path+=/usr/include/x86_64-linux-gnu
 set path+=/usr/include/c++/5
 
 
-autocmd BufNewFile *.sh,*.js exec ":call AutoSetFileHead()"
-function AutoSetFileHead()
-
+function AutoAddHeader()
     if &filetype == 'sh'
         call setline(1, "\#!/bin/bash")
     endif
@@ -298,12 +305,14 @@ function AutoSetFileHead()
     if &filetype == 'js'
         call setline(1, "\"use strict\"")
     endif
-
+"call setline(1,"createdate：".strftime("%y-%m-%d %H:%M:%S"))
     normal G
     normal o
     normal o
 
 endfunc
+
+autocmd BufNewFile *.sh,*.js exec ":call AutoAddHeader()"
 
 """""""""""""""""""vim"""""""""""""""""""
 
@@ -360,8 +369,6 @@ let g:ycm_disable_for_files_larger_than_kb = 10000
 let g:ycm_server_python_interpreter = '/usr/bin/python2.7'
 let g:ycm_python_binary_path = '/usr/bin/python2.7'
 
-" 让Vim的补全菜单行为与一般IDE一致
-"set completeopt=longest,menu
 
 " 在补全完成后自动关闭函数候选列表
 let g:ycm_autoclose_preview_window_after_completion = 0
