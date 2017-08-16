@@ -45,6 +45,12 @@ Plugin 'Valloric/YouCompleteMe'
 Plugin 'w0rp/ale'
 "-------------------Code analysis------------------------------
 
+
+"-------------------Bash------------------------------
+"Write and run BASH-scripts using menus and hotkeys.
+Plugin 'vim-scripts/bash-support.vim'
+"-------------------Bash------------------------------
+
 "-------------------CPP------------------------------
 "--cpp14语法高亮
 Plugin 'octol/vim-cpp-enhanced-highlight'
@@ -127,6 +133,8 @@ Plugin 'jiangmiao/auto-pairs'
 Plugin 'vim-scripts/ShowTrailingWhitespace'
 "--NERDCommenter
 Plugin 'https://github.com/scrooloose/nerdcommenter.git'
+"display the indention levels with thin vertical lines
+Plugin 'Yggdroot/indentLine'
 "-------------------Easily use------------------------------
 
 "-------------------Explorer------------------------------
@@ -155,43 +163,8 @@ call vundle#end()            " required
 " Put your non-Plugin stuff after this line
 """""""""""""""""Vundle""""""""""""""""""
 
-"""""""""""""""""ale""""""""""""""""""
-let &runtimepath.=',~/.vim/bundle/ale'
-let g:ale_sign_error = '✘'
-let g:ale_sign_warning = '⚠'
-let g:ale_echo_msg_error_str = 'E'
-let g:ale_echo_msg_warning_str = 'W'
-let g:ale_statusline_format = ['✘ %d', '⚠ %d', '⬥ ok']
-
-let g:ale_html_htmlhint_executable = 'htmlhint'
-
-let g:ale_javascript_eslint_executable = 'eslint'
-
-let g:ale_css_stylelint_executable = 'stylelint'
-
-"let g:ale_cpp_gcc_options = '-std=c++14 -Wall'
-let g:ale_cpp_clang_options = '-std=c++14 -Wall'
-
-"let g:ale_c_gcc_options = '-std=c11 -Wall'
-let g:ale_c_clang_options = '-std=c11 -Wall'
-
-"Installing:
-"   apt-get install shellcheck
-"let b:ale_sh_shellcheck_exclusions = 'SC2034,SC2154,SC2164'
-let g:ale_sh_shellcheck_executable = 'shellcheck'
-
-
-"Installing:
-"   apt-get install vim-vint
-let g:ale_vim_vint_show_style_issues = 1
-"""""""""""""""""ale""""""""""""""""""
-
-"""""""""""""""""""vim"""""""""""""""""""
-" 开启语法高亮功能
-"syntax enable
-" 允许用指定语法高亮配色方案替换默认方案
+syntax enable
 syntax on
-
 filetype on
 filetype plugin on
 filetype plugin indent on
@@ -218,14 +191,13 @@ set number	    	    	" 显示行号
 "set previewwindow	    	" 标识预览窗口
 set history=50		    	" set command history to 200
 
-set expandtab			    " 将制表符扩展为空格 for indent-guides
-set tabstop=4			    " 设置制表符(tab键)的宽度
-set softtabstop=4		    " 设置软制表符的宽度
-set shiftwidth=4		    " (自动) 缩进使用的4个空格
-
+set noexpandtab			    " 制表符是否扩展为空格
+set tabstop=4			    " 制表符(tab键)的宽度
+set softtabstop=4		    " 软制表符的宽度
+set shiftwidth=4		    " 换行缩进
 
 " 总显示最后一个窗口的状态行；设为1则窗口数多于一个的时候显示最后一个窗口的状态行；0不显示最后一个窗口的状态行
-set laststatus=2
+set laststatus=1
 
 "标尺，用于显示光标位置的行号和列号，逗号分隔。每个窗口都有自己的标尺。如果窗口有状态行，标尺在那里显示。否则，它显示在屏幕的最后一行上。
 set ruler
@@ -234,7 +206,6 @@ set ruler
 set foldmethod=syntax
 " 启动 vim 时关闭折叠代码
 set nofoldenable
-
 
 set showcmd			        " 命令行显示输入的命令
 set showmode		    	" 命令行显示vim当前模式
@@ -260,641 +231,680 @@ set wildmenu
 " 设置退格键
 set backspace=indent,eol,start
 
-
-set cmdheight=2
+set cmdheight=1
 
 set modeline
+"------------------------------------------------------------------
 
-"use clipboard to copy and paste
-noremap <Leader>y "+y
-noremap <Leader>p "+gp
+autocmd BufNewFile,BufReadPost, * exec ":call Main()"
 
-"exit the VIM window
-nnoremap <Leader>q :q<CR>
-"save the file
-nnoremap <Leader>w :w<CR>
-"force save
-nnoremap <Leader>W :w !sudo tee %<CR>
-"save the file then exit
-nnoremap <Leader>x :x<CR>
-"Quickly switch labels
-nnoremap <Leader><tab> :tabnext<CR>
-"fast indentation
-nnoremap <Space> i<Space><Esc>l
+function! Main()
+    call InitCommPlugins()
+    call InitUI()
+    call MapKeys()
+    call AutoComplete()
+endfunc
 
 
-"tabnew && buffer
-nnoremap <C-t> :tabnew<CR>
-nnoremap <Leader><tab> :tabnext<CR>
-nnoremap <Leader><Leader><Tab> :bnext<CR>
+function! AsynChecker()
+    "ale
+    let &runtimepath.=',~/.vim/bundle/ale'
+    let g:ale_sign_error = '✘'
+    let g:ale_sign_warning = '⚠'
+    let g:ale_echo_msg_error_str = 'E'
+    let g:ale_echo_msg_warning_str = 'W'
+    let g:ale_statusline_format = ['✘ %d', '⚠ %d', '⬥ ok']
+
+    let g:ale_html_htmlhint_executable = 'htmlhint'
+
+    let g:ale_javascript_eslint_executable = 'eslint'
+
+    let g:ale_css_stylelint_executable = 'stylelint'
+
+    "let g:ale_cpp_gcc_options = '-std=c++14 -Wall'
+    let g:ale_cpp_clang_options = '-std=c++14 -Wall'
+
+    "let g:ale_c_gcc_options = '-std=c11 -Wall'
+    let g:ale_c_clang_options = '-std=c11 -Wall'
+
+    "Installing:
+    "   apt-get install shellcheck
+    "let b:ale_sh_shellcheck_exclusions = 'SC2034,SC2154,SC2164'
+    let g:ale_sh_shellcheck_executable = 'shellcheck'
+
+
+    "Installing:
+    "   apt-get install vim-vint
+    let g:ale_vim_vint_show_style_issues = 1
+endfunc
+
+
+function! MapKeys()
+    "use clipboard to copy and paste
+    noremap <Leader>y "+y
+    noremap <Leader>p "+gp
+
+    "exit the VIM window
+    nnoremap <Leader>q :q<CR>
+    "save the file
+    nnoremap <Leader>w :w<CR>
+    "force save
+    nnoremap <Leader>W :w !sudo tee %<CR>
+    "save the file then exit
+    nnoremap <Leader>x :x<CR>
+    "Quickly switch labels
+    nnoremap <Leader><tab> :tabnext<CR>
+    "fast indentation
+    nnoremap <Space> i<Space><Esc>l
+
+
+    "tabnew && buffer
+    nnoremap <C-t> :tabnew<CR>
+    nnoremap <Leader><tab> :tabnext<CR>
+    nnoremap <Leader><Leader><Tab> :bnext<CR>
+
+endfunc
 
 " 让配置变更立即生效
 "autocmd BufWritePost $MYVIMRC source $MYVIMRC
 
-" 设置 gf (文件跳转)路径
-set path+=/usr/include
-set path+=/usr/include/x86_64-linux-gnu
-set path+=/usr/include/c++/5
 
+function! SetIndent(n_)
+    exec 'set shiftwidth =' . a:n_
+    exec 'set tabstop    =' . a:n_
+    exec 'set softtabstop=' . a:n_
+endfunc
 
-function REPIDAutoAddHeader()
-    if &filetype == 'sh'
+function! AutoComplete()
+
+    call AsynChecker()
+    call YCM()
+
+    let l:ft = &filetype
+
+    if strlen(l:ft) == 0
+        "call ReContext()
+    elseif l:ft ==? 'sh'
         call setline(1, "\#!/bin/bash")
-    elseif &filetype == 'js'
-        "call setline(1, "use")
+        normal o
+        normal o
+        normal G
+    elseif match(l:ft, 'css\|less') > -1
+        call SetIndent(2)
+        call CompleteCSS()
+    elseif l:ft == 'html'
+        call SetIndent(2)
+        call CompleteHTML()
+    elseif l:ft == 'js'
+        call CompleteJS()
+    elseif l:ft == 'json'
+        call CompleteJSON()
+    elseif match(l:ft, 'c\|cpp\|h') > -1
+        call CompleteC()
+        call SetTags()
+    elseif l:ft == 'php'
+        call CompletePHP()
     endif
-"call setline(1,"createdate：".strftime("%y-%m-%d %H:%M:%S"))
-    normal G
-    normal o
-    normal o
 
 endfunc
 
-autocmd BufNewFile *.sh,*.js exec ":call REPIDAutoAddHeader()"
+function! InitCommPlugins()
+    "auto-pairs
+    " input:  if(a[3])
+    " output: if(a[3])| (In Fly Mode)
+    let g:AutoPairsFlyMode = 0
+
+    "vim-smooth-scroll
+    noremap <silent> <c-u> :call smooth_scroll#up(&scroll, 0, 2)<CR>
+    noremap <silent> <c-d> :call smooth_scroll#down(&scroll, 0, 2)<CR>
+    "noremap <silent> <c-b> :call smooth_scroll#up(&scroll*2, 0, 4)<CR>
+    "noremap <silent> <c-f> :call smooth_scroll#down(&scroll*2, 0, 4)<CR>
 
-"""""""""""""""""""vim"""""""""""""""""""
 
+    "ag
+    "let g:ackprg = 'ag --nogroup --nocolor --column'
+    " or:
+    let g:ackprg = 'ag --vimgrep'
+
+
+    "ctrlsf
+    " 区分大小写 (yes,no,smart)
+    let g:ctrlsf_case_sensitive = 'yes'
 
+    " g:ctrlsf_default_root defines how CtrlSF find search root when no explicit
+    " path is given. Two possible values are cwd and project. cwd means current
+    " working directory and project means project root. CtrlSF locates project
+    " root by searching VCS root (.git, .hg, .svn, etc.)
+    let g:ctrlsf_default_root = 'cwd'
 
-""""""""""""""""auto-pairs"""""""""""""""
-" input:  if(a[3])
-" output: if(a[3])| (In Fly Mode)
-let g:AutoPairsFlyMode = 0
-""""""""""""""""auto-pairs"""""""""""""""
+    " 搜索整个 ctrlsf_default_root 目录
+    nnoremap <Leader>f :CtrlSF<CR>
+    vnoremap <Leader>f :CtrlSF<CR>
 
+    " 窗口宽 30%
+    let g:ctrlsf_winsize = '30%'
 
+    let g:ackprg='ap --nogop --nocolo --column'
 
-""""""""""""""""""ctags""""""""""""""""""
-"set tags+=/usr/include/c++/tags
+    " -R - Use regular expression pattern.
+    " -I, -S - Search case-insensitively (-I) or case-sensitively (-S).
+    " -C, -A, -B - Specify how many context lines to be printed, identical to their counterparts in Ag/Ack.
+    " Read :h ctrlsf-arguments for a full list of arguments.
 
-set tags+=/usr/include/tags
-""""""""""""""""""ctags""""""""""""""""""
+    "nmap     <C-F>f <Plug>CtrlSFPrompt
+    "vmap     <C-F>f <Plug>CtrlSFVwordPath
+    "vmap     <C-F>F <Plug>CtrlSFVwordExec
+    "nmap     <C-F>n <Plug>CtrlSFCwordPath
+    "nmap     <C-F>p <Plug>CtrlSFPwordPath
+    "nnoremap <C-F>o :CtrlSFOpen<CR>
+    "nnoremap <C-F>t :CtrlSFToggle<CR>
+    "inoremap <C-F>t <Esc>:CtrlSFToggle<CR>
 
 
+    "undotree
+    " 撤销
+    nnoremap <F3> :UndotreeToggle<CR>
+    inoremap <F3> <Esc> :UndotreeToggle<CR>
 
-""""""""""""""""""YCM""""""""""""""""""""
-" 输入第一个字符就开始补全
-let g:ycm_min_num_of_chars_for_completion = 1
 
-" 只加载一次 .ycm_extra_conf.py 文件
-let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
+    "easymotion
+    " Disable default mappings
+    "let g:EasyMotion_do_mapping = 0
 
-let g:ycm_complete_in_comments = 1
-let g:ycm_complete_in_strings = 1
-let g:ycm_collect_identifiers_from_comments_and_strings = 0
-" 开启 YCM 标签补全引擎 (ctags)(占内存)
-"let g:ycm_collect_identifiers_from_tags_files = 1
+    " Jump to anywhere you want with minimal keystrokes, with just one key
+    " binding.
+    "`s{char}{label}`
+    "nmap s <Plug>(easymotion-overwin-f)
+    " or
+    " `s{char}{char}{label}`
+    " Need one more keystroke, but on average, it may be more comfortable.
+    "nmap s <Plug>(easymotion-overwin-f2)
 
-" 允许 vim 加载 .ycm_extra_conf.py 文件，不再提示
-let g:ycm_confirm_extra_conf = 1
+    " Turn on case insensitive feature
+    "let g:EasyMotion_smartcase = 1
 
-" 全能补全和路径补全
-inoremap <C-j> <C-x><C-o>
-"inoremap <C-k> <C-x><C-i>
+    " JK motions: Line motions
+    "map <Leader>j <Plug>(easymotion-j)
+    "map <Leader>k <Plug>(easymotion-k)
 
-" 语法关键字补全
-let g:ycm_seed_identifiers_with_syntax = 1
 
-" 错误和警告信息
-let g:syntastic_error_symbol = '✘'
-let g:syntastic_warning_symbol = '⚠'
 
-" 不缓存来自omnifunc，这可能导致计算机运行缓慢
-let g:ycm_cache_omnifunc = 1
+    "快速替换
+    let g:multi_cursor_next_key = '<C-n>'
+
+    "去掉行尾空格
+    nnoremap <leader>t :%s/\s\+$//<cr>:let @/=''<cr>
+endfunc
 
-let g:ycm_disable_for_files_larger_than_kb = 10000
+function! InitUI()
+    call InitStatebar()
+    call InitNERDTree()
+    call InitTagbar()
+    call ShowIndent(1)
+    call SetTheme()
+endfunc
 
-let g:ycm_server_python_interpreter = '/usr/bin/python2.7'
-let g:ycm_python_binary_path = '/usr/bin/python2.7'
 
+function! SetTags()
+    "ctags
+    "set tags+=/usr/include/c++/tags
+    set tags+=/usr/include/tags
+endfunc
+
+function! YCM()
+    "YCM
+    " 输入第一个字符就开始补全
+    let g:ycm_min_num_of_chars_for_completion = 1
+
+    " 只加载一次 .ycm_extra_conf.py 文件
+    let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
+
+    let g:ycm_complete_in_comments = 1
+    let g:ycm_complete_in_strings = 1
+    let g:ycm_collect_identifiers_from_comments_and_strings = 0
+    " 开启 YCM 标签补全引擎 (ctags)(占内存)
+    "let g:ycm_collect_identifiers_from_tags_files = 1
 
-" 在补全完成后自动关闭函数候选列表
-let g:ycm_autoclose_preview_window_after_completion = 0
+    " 允许 vim 加载 .ycm_extra_conf.py 文件，不再提示
+    let g:ycm_confirm_extra_conf = 1
 
-" 离开插入模式后自动关闭预览窗口
-autocmd InsertLeave * if pumvisible() == 0|pclose|end
 
-" 回车即选中当前项
-inoremap <expr> <CR>  pumvisible() ? "\<C-y>" : "\<CR>"
+    " 语法关键字补全
+    let g:ycm_seed_identifiers_with_syntax = 1
 
-" 跳到声明
-nnoremap <C-F12> :YcmCompleter GoToDeclaration<CR>
-inoremap <C-F12> <Esc> :YcmCompleter GoToDeclaration<CR>
+    " 错误和警告信息
+    let g:syntastic_error_symbol = '✘'
+    let g:syntastic_warning_symbol = '⚠'
 
-" 跳到定义
-nnoremap <F12> :YcmCompleter GoToDefinition<CR>
-inoremap <F12> <Esc> :YcmCompleter GoToDefinition<CR>
+    " 不缓存来自omnifunc，这可能导致计算机运行缓慢
+    let g:ycm_cache_omnifunc = 1
 
-" 返回类型
-vnoremap <leader>g :YcmCompleter GetType<CR>
-nnoremap <leader>g :YcmCompleter GetType<CR>
+    let g:ycm_disable_for_files_larger_than_kb = 10000
 
-" 调用此命令将强制YCM立即重新编译文件和显示遇到的任何新的诊断方法
-"nnoremap <F5> :YcmForceCompileAndDiagnostics<CR>
-"inoremap <F5> <Esc> :YcmForceCompileAndDiagnostics<CR>
+    let g:ycm_server_python_interpreter = '/usr/bin/python2.7'
+    let g:ycm_python_binary_path = '/usr/bin/python2.7'
 
-let g:ycm_semantic_triggers =  {
-            \   'c' : ['->', '.'],
-            \   'objc' : ['->', '.'],
-            \   'ocaml' : ['.', '#'],
-            \   'cpp,objcpp' : ['->', '.', '::'],
-            \   'perl' : ['->'],
-            \   'php' : ['->', '::', '(', 'use ', 'namespace ', '\'],
-            \   'cs,java,typescript,d,python,perl6,scala,vb,elixir,go' : ['.', 're!(?=[a-zA-Z]{3,4})'],
-            \   'html': ['<', '"', '</', ' '],
-            \   'vim' : ['re![_a-za-z]+[_\w]*\.'],
-            \   'ruby' : ['.', '::'],
-            \   'lua' : ['.', ':'],
-            \   'erlang' : [':'],
-            \   'haskell' : ['.', 're!.'],
-            \   'scss,css': [ 're!^\s{2,4}', 're!:\s+' ],
-            \ }
-""""""""""""""""""YCM""""""""""""""""""""
 
+    " 在补全完成后自动关闭函数候选列表
+    let g:ycm_autoclose_preview_window_after_completion = 0
 
+    " 离开插入模式后自动关闭预览窗口
+    autocmd InsertLeave * if pumvisible() == 0|pclose|end
 
-"""""""""""""""""airline"""""""""""""""""""
-let g:airline#extension#ycm#enabled = 1
-let g:airline#extension#ycm#error_symbol = 'E:'
-let g:airline#extension#ycm#warning_symbol = 'W:'
-let g:airline#extensions#tabline#buffer_nr_show = 1
-"""""""""""""""""airline"""""""""""""""""""
+    " 全能补全和路径补全
+    inoremap <C-j> <C-x><C-o>
+    "inoremap <C-k> <C-x><C-i>
 
-"""""""""""""""""airline-theme"""""""""""""""""""
-let g:airline_theme='cobalt2'
-"""""""""""""""""airline-theme"""""""""""""""""""
+    " 回车即选中当前项
+    inoremap <expr> <CR>  pumvisible() ? "\<C-y>" : "\<CR>"
 
+    " 跳到声明
+    nnoremap <C-F12> :YcmCompleter GoToDeclaration<CR>
+    inoremap <C-F12> <Esc> :YcmCompleter GoToDeclaration<CR>
 
+    " 跳到定义
+    nnoremap <F12> :YcmCompleter GoToDefinition<CR>
+    inoremap <F12> <Esc> :YcmCompleter GoToDefinition<CR>
 
-""""""""""""""NERDTree"""""""""""""""
-" open a NERDTree automatically when vim starts up
-"autocmd VimEnter * NERDTree
+    " 返回类型
+    vnoremap <leader>g :YcmCompleter GetType<CR>
+    nnoremap <leader>g :YcmCompleter GetType<CR>
 
-" open/close the NERDTree with F2
-nnoremap <F2> :NERDTreeToggle<CR>
-"inoremap <F2> <Esc> :NERDTreeToggle<CR>
+    " 调用此命令将强制YCM立即重新编译文件和显示遇到的任何新的诊断方法
+    "nnoremap <F5> :YcmForceCompileAndDiagnostics<CR>
+    "inoremap <F5> <Esc> :YcmForceCompileAndDiagnostics<CR>
+
+    let g:ycm_semantic_triggers =  {
+                \   'c' : ['->', '.'],
+                \   'objc' : ['->', '.'],
+                \   'ocaml' : ['.', '#'],
+                \   'cpp,objcpp' : ['->', '.', '::'],
+                \   'perl' : ['->'],
+                \   'php' : ['->', '::', '(', 'use ', 'namespace ', '\'],
+                \   'cs,java,typescript,d,python,perl6,scala,vb,elixir,go' : ['.', 're!(?=[a-zA-Z]{3,4})'],
+                \   'html': ['<', '"', '</', ' '],
+                \   'vim' : ['re![_a-za-z]+[_\w]*\.'],
+                \   'ruby' : ['.', '::'],
+                \   'lua' : ['.', ':'],
+                \   'erlang' : [':'],
+                \   'haskell' : ['.', 're!.'],
+                \   'scss,css': [ 're!^\s{2,4}', 're!:\s+' ],
+                \ }
+endfunc
+
+
+function! InitStatebar()
+    "airline
+    let g:airline#extension#ycm#enabled = 1
+    let g:airline#extension#ycm#error_symbol = 'E:'
+    let g:airline#extension#ycm#warning_symbol = 'W:'
+    let g:airline#extensions#tabline#buffer_nr_show = 1
+
+    "airline-theme
+    let g:airline_theme='cobalt2'
+
+    "vim-devicons
+    "for vim-airline
+    let g:airline_powerline_fonts = 1
+endfunc
+
+function! InitNERDTree()
+    "NERDTree
+    " open a NERDTree automatically when vim starts up
+    "autocmd VimEnter * NERDTree
+
+    " open/close the NERDTree with F2
+    nnoremap <F2> :NERDTreeToggle<CR>
+    "inoremap <F2> <Esc> :NERDTreeToggle<CR>
+
+    "" bookmarks
+    let g:NERDTreeShowBookmarks = 1
+
+    "" hidden of files
+    "let NERDTreeShowHidden = 1
+
+    " NERDTree 子窗口中不显示冗余帮助信息和书签
+    let g:NERDTreeMinimalUI = 1
+
+    let g:NERDTreeWinSize = 30
+    let g:NERDTreeWinPos = 'left'
+
+    let g:NERDTreeShowLineNumbers = 1
+endfunc
+
+
+function! InitTagbar()
+    "tagbar
+    " 快捷键打开/关闭
+    nnoremap <F4> :TagbarToggle<CR>
+    inoremap <F4> <Esc> :TagbarToggle<CR>
+
+    " 不显示最上面的帮助信息及全页显示函数信息
+    let g:tagbar_compact = 1
+
+    " the path of ctags
+    let g:tagbar_ctags_bin = '/usr/bin/ctags'
+
+    " you know
+    let g:tagbar_width = 24
+
+    " you know
+    "let g:tagbar_atoclose = 1
+
+    " it will be automatically load the tagbar when you open the following types of files
+    "autocmd BufReadPost *.cpp,*.c,*.h,*.cc,*.cxx call tagbar#autoopen()
+
+    " you know
+    "let g:tagbar_left = 1
+
+
+    " 设置 ctags 对哪些代码标识符生成标签
+    let g:tagbar_type_cpp = {
+                \ 'kinds' : [
+                \ 'c:classes:0:1',
+                \ 'd:macros:0:1',
+                \ 'e:enumerators:0:0',
+                \ 'f:functions:0:1',
+                \ 'g:enumeration:0:1',
+                \ 'l:local:0:1',
+                \ 'm:members:0:1',
+                \ 'n:namespaces:0:1',
+                \ 'p:functions_prototypes:0:1',
+                \ 's:structs:0:1',
+                \ 't:typedefs:0:1',
+                \ 'u:unions:0:1',
+                \ 'v:global:0:1',
+                \ 'x:external:0:1'
+                \ ],
+                \ 'sro'        : '::',
+                \ 'kind2scope' : {
+                \ 'g' : 'enum',
+                \ 'n' : 'namespace',
+                \ 'c' : 'class',
+                \ 's' : 'struct',
+                \ 'u' : 'union'
+                \ },
+                \ 'scope2kind' : {
+                \ 'enum'      : 'g',
+                \ 'namespace' : 'n',
+                \ 'class'     : 'c',
+                \ 'struct'    : 's',
+                \ 'union'     : 'u'
+                \ }
+                \ }
+endfunc
+
+
+function! CompleteJSON()
+    "vim-json
+    let g:vim_json_syntax_conceal = 1
+    let g:vim_json_warnings = 1
+endfunc
+
+
+function! CompleteC()
+    " 设置 gf (文件跳转)路径
+    set path+=/usr/include
+    set path+=/usr/include/x86_64-linux-gnu
+    set path+=/usr/include/c++/5
+
+    "fswitch
+    "Switch to the file and load it into the current window.(*.cpp *.h)
+    nnoremap <silent> <Leader>ch :FSHere<CR>
+
+    "Highlighting of class scope
+    let g:cpp_class_scope_highlight = 1
+    "Highlighting of template functions
+    let g:cpp_experimental_template_highlight = 1
+endfunc
+
+
+
+function! CompleteJS()
+    "javascript-libraries-syntax
+    "Support libs id:
+    "jQuery: jquery
+    "underscore.js: underscore
+    "Lo-Dash: underscore
+    "Backbone.js: backbone
+    "prelude.ls: prelude
+    "AngularJS: angularjs
+    "AngularUI: angularui
+    "AngularUI Router: angularuirouter
+    "React: react
+    "Flux: flux
+    "RequireJS: requirejs
+    "Sugar.js: sugar
+    "Jasmine: jasmine
+    "Chai: chai
+    "Handlebars: handlebars
+    "Ramda: ramda
+    "Vue.js: vue
+    "d3.js: d3
+    let g:used_javascript_libs = 'jquery,react'
+
+    "vim-javascript
+    "Enables syntax highlighting for JSDocs.
+    "e.g.
+    "/**
+    " * Represents a book.
+    " * @constructor
+    " * @param {string} title - The title of the book.
+    " * @param {string} author - The author of the book.
+    " */
+    "function Book(title, author) {
+    "}
+    let g:javascript_plugin_jsdoc = 1
+
+
+    "vim-jsdoc
+    let g:jsdoc_enable_es6 = 1	"Enable to use ECMAScript6's Shorthand function, Arrow function.
+    nnoremap <leader>d :JsDoc<CR>
+
+    "tern_for_vim
+    "you should create a ".tern-project" file in the root
+    "directory of your project. The following is just an example:
+    "{
+    "    "libs": [
+    "        "browser",
+    "        "chai",
+    "        "ecma5",
+    "        "ecma6",
+    "        "jquery",
+    "        "underscore"
+    "    ],
+    "    "loadEagerly": [
+    "        "importantfile.js"
+    "    ],
+    "    "plugins": {
+    "        "angular":{},
+    "        "node":{},
+    "        "complete_strings":{},
+    "        "modules":{},
+    "        "es_modules":{},
+    "        "requirejs": {
+    "            "baseURL": "./",
+    "            "paths": {}
+    "        }
+    "    }
+    "}
+    "COMMANDS
+    "|:TernDoc|...................... Look up Documentation
+    "|:TernDocBrowse|................ Browse the Documentation
+    "|:TernType|..................... Perform a type look up
+    "|:TernDef|...................... Look up definition
+    "|:TernDefPreview|............... Look up definition in preview
+    "|:TernDefSplit|................. Look up definition in new split
+    "|:TernDefTab|................... Look up definition in new tab
+    "|:TernRefs|..................... Look up references
+    "|:TernRename|................... Rename identifier
+    let tern_show_signature_in_pum = 1
+    let tern_show_argument_hints = 'on_hold'
+    nnoremap <F12> :TernDefPreview<CR>
+    inoremap <F12> <Esc> :TernDefPreview<CR>
+    nnoremap <C-F12> :TernDoc<CR>
+    inoremap <C-F12> <Esc> :TernDoc<CR>
+    setlocal omnifunc=tern#Complete
+endfunc
+
+
+function! CompleteCSS()
+    "vim-css3-syntax
+    "Some properties do not highlight correctly by default.so put following...
+    augroup VimCSS3Syntax
+        autocmd!
+        "autocmd FileType css setlocal iskeyword+=-
+        autocmd FileType css,less setlocal iskeyword+=-
+    augroup END
+endfunc
+
+function! CompleteHTML()
+    "emmet-vim
+    "let g:user_emmet_mode='n'    "only enable normal mode functions.
+    "let g:user_emmet_mode='inv'  "enable all functions, which is equal to
+    let g:user_emmet_mode='a'    "enable all function in all mode.
+
+    "Enable just for html/css
+    let g:user_emmet_install_global = 0
+    autocmd FileType html,css,less EmmetInstall
+
+    "trigger key
+    let g:user_emmet_leader_key='<C-y>'
+
+    let g:user_emmet_settings = {
+                \    'variables' : {
+                \         'lang': 'zh',
+                \         'charset': 'UTF-8',
+                \         'newline': '\n',
+                \    },
+                \    'indentation': '    ',
+                \    'html' : {
+                \         'snippets': {
+                \            'cc:ie': "<!--[if IE]>\n\t${child}|\n<![endif]-->",
+                \            'cc:noie': "<!--[if !IE]><!-->\n\t${child}|\n<!--<![endif]-->",
+                \            'html:5': "<!DOCTYPE html>\n"
+                \                     ."<html lang=\"${lang}\">\n"
+                \                     ."<head>\n"
+                \                     ."  <meta charset=\"UTF-8\">\n"
+                \                     ."  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+                \                     ."  <title>todo</title>\n"
+                \                     ."</head>\n"
+                \                     ."<body>\n"
+                \                     ."  ${child}|\n"
+                \                     ."</body>\n"
+                \                     ."</html>",
+                \        },
+                \        'expandos' : {
+                \            'ol': 'ol>li',
+                \            'list': 'ul>li*3',
+                \            'details': 'details>summary',
+                \        },
+                \        'default_attributes': {
+                \            'a': {'href': ''},
+                \            'meta': [{'name': 'viewport'},{'content': 'width=device-width, initial-scale=1.0'}],
+                \            'link': [{'rel': 'stylesheet'}, {'href': ''}],
+                \            'script':    {'type': 'text/javascript'},
+                \            'img': [{'src': ''}, {'alt': 'loading'}],
+                \        },
+                \        'aliases': {
+                \            'bq': 'blockquote',
+                \            'obj': 'object',
+                \            'src': 'source',
+                \        },
+                \        'empty_elements': 'area,base,basefont,isindex,link,meta,br,input',
+                \        'block_elements': 'address,applet,blockquote,li,link,map',
+                \        'inline_elements': 'a,abbr,acronym',
+                \        'empty_element_suffix': ' />',
+                \    },
+                \}
+
+
+
+    "event-handler attributes support:
+    let g:html5_event_handler_attributes_complete = 1
+    "RDFa attributes support:
+    let g:html5_rdfa_attributes_complete = 1
+    "microdata attributes support:
+    let g:html5_microdata_attributes_complete = 1
+    "WAI-ARIA attribute support:
+    let g:html5_aria_attributes_complete = 1
+endfunc
+
+
+function! CompletePHP()
+    "php.vim
+    let php_sql_query = 1
+    let php_html_instrings = 1
+    let php_parent_error_close = 1
+    let php_parent_error_open = 1
+    "let php_var_selector_is_identifier = 1
+
+    function! PhpSyntaxOverride()
+        hi! def link phpDocTags  phpDefine
+        hi! def link phpDocParam phpType
+    endfunction
+
+    augroup phpSyntaxOverride
+        autocmd!
+        autocmd FileType php call PhpSyntaxOverride()
+    augroup END
+
+
+
+    "phpcomplete.vim
+    let g:phpcomplete_relax_static_constraint = 1
+    let g:phpcomplete_complete_for_unknown_classes = 1
+    let g:phpcomplete_search_tags_for_variables = 1
+    let g:phpcomplete_parse_docblock_comments = 1
+
+    let g:phpcomplete_mappings = {
+                \ 'jump_to_def': '<C-]>',
+                \ 'jump_to_def_split': '<C-W><C-]>',
+                \ 'jump_to_def_vsplit': '<C-W><C-\>',
+                \}
+
+endfunc
+
+
+
+"Yggdroot/indentLine
+"@param
+"		f_: pass 1 to load plugin...
+function! ShowIndent(f_)
+    let g:indentLine_loaded      = a:f_
+    let g:indentLine_enabled     = 1
+    let g:indentLine_char        = '┆'
+    let g:indentLine_indentLevel = 2
+    nnoremap <leader>i :IndentLinesToggle <cr>
+endfunc
+
+function! SetTheme()
+    "--molokai
+    "colorscheme molokai
+    "let g:rehash256 = 1
+    "let g:molokai_original = 1
+
+    "set t_Co=256   " This is may or may not needed.
+    "set background=light
+    "colorscheme PaperColor
+
+
+    "let g:flattend_termcolors=256
+    "colorscheme flattened_dark
+
+
+    "set t_Co=256
+    "if (has("termguicolors"))
+    "set termguicolors
+    "endif
+    "colorscheme OceanicNext
+    "let g:airline_theme='oceanicnext'
+
+    "colorscheme molokayo
+
+    if (has("termguicolors"))
+        set termguicolors
+    endif
+    colorscheme solarized8_dark
+endfunc
 
-"" bookmarks
-let g:NERDTreeShowBookmarks = 1
-
-"" hidden of files
-"let NERDTreeShowHidden = 1
-
-" NERDTree 子窗口中不显示冗余帮助信息和书签
-let g:NERDTreeMinimalUI = 1
-
-let g:NERDTreeWinSize = 30
-let g:NERDTreeWinPos = 'left'
-
-let g:NERDTreeShowLineNumbers = 1
-""""""""""""""NERDTree"""""""""""""""
-
-
-
-""""""""""""""""""tagbar""""""""""""
-" 快捷键打开/关闭
-nnoremap <F4> :TagbarToggle<CR>
-inoremap <F4> <Esc> :TagbarToggle<CR>
-
-" 不显示最上面的帮助信息及全页显示函数信息
-let g:tagbar_compact = 1
-
-" the path of ctags
-let g:tagbar_ctags_bin = '/usr/bin/ctags'
-
-" you know
-let g:tagbar_width = 24
-
-" you know
-"let g:tagbar_atoclose = 1
-
-" it will be automatically load the tagbar when you open the following types of files
-"autocmd BufReadPost *.cpp,*.c,*.h,*.cc,*.cxx call tagbar#autoopen()
-
-" you know
-"let g:tagbar_left = 1
-
-
-" 设置 ctags 对哪些代码标识符生成标签
-let g:tagbar_type_cpp = {
-    \ 'kinds' : [
-         \ 'c:classes:0:1',
-         \ 'd:macros:0:1',
-         \ 'e:enumerators:0:0',
-         \ 'f:functions:0:1',
-         \ 'g:enumeration:0:1',
-         \ 'l:local:0:1',
-         \ 'm:members:0:1',
-         \ 'n:namespaces:0:1',
-         \ 'p:functions_prototypes:0:1',
-         \ 's:structs:0:1',
-         \ 't:typedefs:0:1',
-         \ 'u:unions:0:1',
-         \ 'v:global:0:1',
-         \ 'x:external:0:1'
-     \ ],
-     \ 'sro'        : '::',
-     \ 'kind2scope' : {
-         \ 'g' : 'enum',
-         \ 'n' : 'namespace',
-         \ 'c' : 'class',
-         \ 's' : 'struct',
-         \ 'u' : 'union'
-     \ },
-     \ 'scope2kind' : {
-         \ 'enum'      : 'g',
-         \ 'namespace' : 'n',
-         \ 'class'     : 'c',
-         \ 'struct'    : 's',
-         \ 'union'     : 'u'
-     \ }
-\ }
-""""""""""""""""""tagbar""""""""""""
-
-
-"""""""""""""""""""fswitch"""""""""""""""""""
-"Switch to the file and load it into the current window.(*.cpp *.h)
-nmap <silent> <Leader>ch :FSHere<CR>
-"""""""""""""""""""fswitch"""""""""""""""""""
-
-
-
-""""""""""""""""""""""ag"""""""""""""""""""
-"let g:ackprg = 'ag --nogroup --nocolor --column'
-" or:
-let g:ackprg = 'ag --vimgrep'
-""""""""""""""""""""""ag"""""""""""""""""""
-
-
-"""""""""""""""""""""ctrlsf""""""""""""""""
-" 区分大小写 (yes,no,smart)
-let g:ctrlsf_case_sensitive = 'yes'
-
-" g:ctrlsf_default_root defines how CtrlSF find search root when no explicit
-" path is given. Two possible values are cwd and project. cwd means current
-" working directory and project means project root. CtrlSF locates project
-" root by searching VCS root (.git, .hg, .svn, etc.)
-let g:ctrlsf_default_root = 'cwd'
-
-" 搜索整个 ctrlsf_default_root 目录
-nnoremap <Leader>f :CtrlSF<CR>
-vnoremap <Leader>f :CtrlSF<CR>
-
-" 窗口宽 30%
-let g:ctrlsf_winsize = '30%'
-
-let g:ackprg='ap --nogop --nocolo --column'
-
-" -R - Use regular expression pattern.
-" -I, -S - Search case-insensitively (-I) or case-sensitively (-S).
-" -C, -A, -B - Specify how many context lines to be printed, identical to their counterparts in Ag/Ack.
-" Read :h ctrlsf-arguments for a full list of arguments.
-
-"nmap     <C-F>f <Plug>CtrlSFPrompt
-"vmap     <C-F>f <Plug>CtrlSFVwordPath
-"vmap     <C-F>F <Plug>CtrlSFVwordExec
-"nmap     <C-F>n <Plug>CtrlSFCwordPath
-"nmap     <C-F>p <Plug>CtrlSFPwordPath
-"nnoremap <C-F>o :CtrlSFOpen<CR>
-"nnoremap <C-F>t :CtrlSFToggle<CR>
-"inoremap <C-F>t <Esc>:CtrlSFToggle<CR>
-"""""""""""""""""""""ctrlsf""""""""""""""""
-
-
-
-"""""""""""""""undotree""""""""""""""""""
-" 撤销
-nnoremap <F3> :UndotreeToggle<CR>
-inoremap <F3> <Esc> :UndotreeToggle<CR>
-"""""""""""""""undotree""""""""""""""""""
-
-
-
-"""""""""""""""easymotion""""""""""""""""
-" Disable default mappings
-"let g:EasyMotion_do_mapping = 0
-
-" Jump to anywhere you want with minimal keystrokes, with just one key
-" binding.
-"`s{char}{label}`
-"nmap s <Plug>(easymotion-overwin-f)
-" or
-" `s{char}{char}{label}`
-" Need one more keystroke, but on average, it may be more comfortable.
-"nmap s <Plug>(easymotion-overwin-f2)
-
-" Turn on case insensitive feature
-"let g:EasyMotion_smartcase = 1
-
-" JK motions: Line motions
-"map <Leader>j <Plug>(easymotion-j)
-"map <Leader>k <Plug>(easymotion-k)
-"""""""""""""""easymotion""""""""""""""""
-
-
-
-"""""""""""""""CPP syntax""""""""""""""""
-"Highlighting of class scope is disabled by default. To enable set
-let g:cpp_class_scope_highlight = 1
-
-"Highlighting of template functions is enabled by setting
-let g:cpp_experimental_template_highlight = 1
-"""""""""""""""CPP syntax""""""""""""""""
-
-
-
-""""""""""""""""快速替换"""""""""""""""""""
-let g:multi_cursor_next_key = '<C-n>'
-""""""""""""""""快速替换"""""""""""""""""""
-
-""""""""""""""""去掉行尾空格"""""""""""""""""""
-nnoremap <leader>t :%s/\s\+$//<cr>:let @/=''<cr>
-""""""""""""""""去掉行尾空格"""""""""""""""""""
-
-
-"""""""""""""vim-json""""""""""""""""
-let g:vim_json_syntax_conceal = 1
-let g:vim_json_warnings=1
-"""""""""""""vim-json""""""""""""""""
-
-
-"""""""""""""html5""""""""""""""""
-"event-handler attributes support:
-let g:html5_event_handler_attributes_complete = 1
-"RDFa attributes support:
-let g:html5_rdfa_attributes_complete = 1
-"microdata attributes support:
-let g:html5_microdata_attributes_complete = 1
-"WAI-ARIA attribute support:
-let g:html5_aria_attributes_complete = 1
-"""""""""""""html5""""""""""""""""
-
-
-"""""""""""""javascript-libraries-syntax""""""""""""""""
-"Support libs id:
-"jQuery: jquery
-"underscore.js: underscore
-"Lo-Dash: underscore
-"Backbone.js: backbone
-"prelude.ls: prelude
-"AngularJS: angularjs
-"AngularUI: angularui
-"AngularUI Router: angularuirouter
-"React: react
-"Flux: flux
-"RequireJS: requirejs
-"Sugar.js: sugar
-"Jasmine: jasmine
-"Chai: chai
-"Handlebars: handlebars
-"Ramda: ramda
-"Vue.js: vue
-"d3.js: d3
-let g:used_javascript_libs = 'jquery,angularjs,angularui,angularuirouter,vue'
-
-"""""""""""""javascript-libraries-syntax""""""""""""""""
-
-
-"""""""""""""emmet-vim""""""""""""""""
-"let g:user_emmet_mode='n'    "only enable normal mode functions.
-"let g:user_emmet_mode='inv'  "enable all functions, which is equal to
-let g:user_emmet_mode='a'    "enable all function in all mode.
-
-"Enable just for html/css
-let g:user_emmet_install_global = 0
-autocmd FileType html,css EmmetInstall
-
-
-"trigger key
-let g:user_emmet_leader_key='<C-y>'
-
-
-let g:user_emmet_settings = {
-\    'variables' : {
-\         'lang': 'zh',
-\         'charset': 'UTF-8',
-\         'newline': '\n',
-\    },
-\    'indentation': '    ',
-\    'html' : {
-\         'snippets': {
-\            'cc:ie': "<!--[if IE]>\n\t${child}|\n<![endif]-->",
-\            'cc:noie': "<!--[if !IE]><!-->\n\t${child}|\n<!--<![endif]-->",
-\            'html:5': "<!DOCTYPE html>\n"
-\                     ."<html lang=\"${lang}\">\n"
-\                     ."<head>\n"
-\                     ."\t<meta charset=\"UTF-8\">\n"
-\                     ."\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-\                     ."\t<title>todo</title>\n"
-\                     ."</head>\n"
-\                     ."<body>\n"
-\                     ."\t${child}|\n"
-\                     ."</body>\n"
-\                     ."</html>",
-\        },
-\        'expandos' : {
-\            'ol': 'ol>li',
-\            'list': 'ul>li*3',
-\            'details': 'details>summary',
-\        },
-\        'default_attributes': {
-\            'a': {'href': ''},
-\            'meta': [{'name': 'viewport'},{'content': 'width=device-width, initial-scale=1.0'}],
-\            'link': [{'rel': 'stylesheet'}, {'href': ''}],
-\            'script':    {'type': 'text/javascript'},
-\            'img': [{'src': ''}, {'alt': 'loading'}],
-\        },
-\        'aliases': {
-\            'bq': 'blockquote',
-\            'obj': 'object',
-\            'src': 'source',
-\        },
-\        'empty_elements': 'area,base,basefont,isindex,link,meta,br,input',
-\        'block_elements': 'address,applet,blockquote,li,link,map',
-\        'inline_elements': 'a,abbr,acronym',
-\        'empty_element_suffix': ' />',
-\    },
-\}
-
-"""""""""""""emmet-vim""""""""""""""""
-
-
-""""""""""""""vim-css3-syntax"""""""""""""""
-"Some properties do not highlight correctly by default.so put following...
-augroup VimCSS3Syntax
-  autocmd!
-  autocmd FileType css setlocal iskeyword+=-
-augroup END
-""""""""""""""vim-css3-syntax"""""""""""""""
-
-"""""""""""""php.vim""""""""""""""""
-let php_sql_query = 1
-let php_html_instrings = 1
-let php_parent_error_close = 1
-let php_parent_error_open = 1
-"let php_var_selector_is_identifier = 1
-
-function! PhpSyntaxOverride()
-  hi! def link phpDocTags  phpDefine
-  hi! def link phpDocParam phpType
-endfunction
-
-augroup phpSyntaxOverride
-  autocmd!
-  autocmd FileType php call PhpSyntaxOverride()
-augroup END
-"""""""""""""php.vim""""""""""""""""
-
-"""""""""""""vim-javascript""""""""""""""""
-"Enables syntax highlighting for JSDocs.
-"e.g.
-"/**
-" * Represents a book.
-" * @constructor
-" * @param {string} title - The title of the book.
-" * @param {string} author - The author of the book.
-" */
-"function Book(title, author) {
-"}
-let g:javascript_plugin_jsdoc = 1
-"""""""""""""vim-javascript""""""""""""""""
-
-""""""""""""""vim-jsdoc"""""""""""""""
-"Usage
-"1.Move cursor on function keyword line.
-"2.Type :JsDoc to insert JSDoc.
-"3.Insert JSDoc above the function keyword line.
-
-"Config
-"g:jsdoc_allow_input_prompt	0	Allow prompt for interactive input.
-"g:jsdoc_input_description	0	Prompt for a function description
-"g:jsdoc_additional_descriptions	0	Prompt for a value for @name, add it to the JSDoc block comment along with the @function tag.
-"g:jsdoc_return	1	Add the @return tag.
-"g:jsdoc_return_type	1	Prompt for and add a type for the aforementioned @return tag.
-"g:jsdoc_return_description	1	Prompt for and add a description for the @return tag.
-"g:jsdoc_access_descriptions	0	Set value to 1 to turn on access tags like `@access <private
-"g:jsdoc_underscore_private	0	Set value to 1 to turn on detecting underscore starting functions as private convention
-"g:jsdoc_allow_shorthand	0	Set value to 1 to allow ECMAScript6 shorthand syntax. Since ver 0.5.0 deprecated. Use g:jsdoc_enable_es6 instead.
-"g:jsdoc_param_description_separator	' '	Characters used to separate @param name and description.
-"g:jsdoc_custom_args_hook	{}	Override default type and description. See help more detail.
-"g:jsdoc_custom_args_regex_only	0	When using custom_args_hook, only match against regexes
-"g:jsdoc_type_hook	{}	Allow to insert default description depending on the type.
-"g:jsdoc_enable_es6	0	Enable to use ECMAScript6's Shorthand function, Arrow function.
-"g:jsdoc_tags	see :h	Allow use of alternate tags (the ones that support synonyms) per JSDoc documentation. Can be changed on a per tag basis, for example: `let g:jsdoc_tags = {}
-"g:jsdoc_user_defined_tags	{}	Allow use of user_defined_tags.
-
-
-"Keymap
-"generate js doc automatically
-nnoremap <C-d> :JsDoc<CR>
-
-""""""""""""""vim-jsdoc"""""""""""""""
-
-
-""""""""""""""tern_for_vim"""""""""""""""
-"you should create a ".tern-project" file in the root
-"directory of your project. The following is just an example:
-"{
-"    "libs": [
-"        "browser",
-"        "chai",
-"        "ecma5",
-"        "ecma6",
-"        "jquery",
-"        "underscore"
-"    ],
-"    "loadEagerly": [
-"        "importantfile.js"
-"    ],
-"    "plugins": {
-"        "angular":{},
-"        "node":{},
-"        "complete_strings":{},
-"        "modules":{},
-"        "es_modules":{},
-"        "requirejs": {
-"            "baseURL": "./",
-"            "paths": {}
-"        }
-"    }
-"}
-
-"COMMANDS
-"|:TernDoc|...................... Look up Documentation
-"|:TernDocBrowse|................ Browse the Documentation
-"|:TernType|..................... Perform a type look up
-"|:TernDef|...................... Look up definition
-"|:TernDefPreview|............... Look up definition in preview
-"|:TernDefSplit|................. Look up definition in new split
-"|:TernDefTab|................... Look up definition in new tab
-"|:TernRefs|..................... Look up references
-"|:TernRename|................... Rename identifier
-
-let tern_show_signature_in_pum = 1
-let tern_show_argument_hints = 'on_hold'
-autocmd FileType javascript nnoremap <F12> :TernDefPreview<CR>
-autocmd FileType javascript inoremap <F12> <Esc> :TernDefPreview<CR>
-autocmd FileType javascript nnoremap <C-F12> :TernDoc<CR>
-autocmd FileType javascript inoremap <C-F12> <Esc> :TernDoc<CR>
-autocmd FileType javascript setlocal omnifunc=tern#Complete
-""""""""""""""tern_for_vim"""""""""""""""
-
-""""""""""""""phpcomplete.vim"""""""""""""""
-let g:phpcomplete_relax_static_constraint = 1
-let g:phpcomplete_complete_for_unknown_classes = 1
-let g:phpcomplete_search_tags_for_variables = 1
-let g:phpcomplete_parse_docblock_comments = 1
-
-let g:phpcomplete_mappings = {
-   \ 'jump_to_def': '<C-]>',
-   \ 'jump_to_def_split': '<C-W><C-]>',
-   \ 'jump_to_def_vsplit': '<C-W><C-\>',
-   \}
-""""""""""""""phpcomplete.vim"""""""""""""""
-
-""""""""""""""vim-smooth-scroll"""""""""""""""
-noremap <silent> <c-u> :call smooth_scroll#up(&scroll, 0, 2)<CR>
-noremap <silent> <c-d> :call smooth_scroll#down(&scroll, 0, 2)<CR>
-"noremap <silent> <c-b> :call smooth_scroll#up(&scroll*2, 0, 4)<CR>
-"noremap <silent> <c-f> :call smooth_scroll#down(&scroll*2, 0, 4)<CR>
-""""""""""""""vim-smooth-scroll"""""""""""""""
-
-""""""""""""""vim-devicons"""""""""""""""
-"for vim-airline
-let g:airline_powerline_fonts = 1
-""""""""""""""vim-devicons"""""""""""""""
-
-
-
-"-------------------Shell------------------------------
-"a static analysis tool for shell scripts
-"-------------------Shell------------------------------
-"""""""""""""Theme""""""""""""""""
-"--molokai
-"colorscheme molokai
-"let g:rehash256 = 1
-"let g:molokai_original = 1
-
-"set t_Co=256   " This is may or may not needed.
-"set background=light
-"colorscheme PaperColor
-
-
-"let g:flattend_termcolors=256
-"colorscheme flattened_dark
-
-
-"set t_Co=256
-"if (has("termguicolors"))
-"set termguicolors
-"endif
-"colorscheme OceanicNext
-"let g:airline_theme='oceanicnext'
-
-"colorscheme molokayo
-
-if (has("termguicolors"))
-set termguicolors
-endif
-colorscheme solarized8_dark
-"""""""""""""Theme""""""""""""""""
