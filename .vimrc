@@ -297,13 +297,11 @@ set path+=/usr/include/x86_64-linux-gnu
 set path+=/usr/include/c++/5
 
 
-function AutoAddHeader()
+function REPIDAutoAddHeader()
     if &filetype == 'sh'
         call setline(1, "\#!/bin/bash")
-    endif
-
-    if &filetype == 'js'
-        call setline(1, "\"use strict\"")
+    elseif &filetype == 'js'
+        "call setline(1, "use")
     endif
 "call setline(1,"createdate：".strftime("%y-%m-%d %H:%M:%S"))
     normal G
@@ -312,7 +310,7 @@ function AutoAddHeader()
 
 endfunc
 
-autocmd BufNewFile *.sh,*.js exec ":call AutoAddHeader()"
+autocmd BufNewFile *.sh,*.js exec ":call REPIDAutoAddHeader()"
 
 """""""""""""""""""vim"""""""""""""""""""
 
