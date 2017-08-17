@@ -104,6 +104,8 @@ Plugin 'StanAngeloff/php.vim'
 
 
 "-------------------Javascript------------------------------
+"A vim javascript indent script
+Plugin 'jiangmiao/simple-javascript-indenter'
 "Javascript indenter (HTML indent is included)
 Plugin 'vim-scripts/JavaScript-Indent'
 "provides syntax highlighting and improved indentation.
@@ -173,14 +175,19 @@ filetype plugin indent on
 "let g:syntastic_cpp_compiler_options = '-std=c++11 -stdlib=libc++'
 
 
-"set ignorecase		    	" 搜索模式里忽略大小写
+set ignorecase		    	" 搜索模式里忽略大小写
 "set smartcase		    	" 如果搜索模式包含大写字符，不使用 'ignorecase' 选项。只有在输入搜索模式并且打开 'ignorecase' 选项时才会使用。
 set autowrite		    	" 自动把内容写回文件: 如果文件被修改过，在每个 :next、:rewind、:last、:first、:previous、:stop、:suspend、:tag、:!、:make、CTRL-] 和 CTRL-^命令时进行；用 :buffer、CTRL-O、CTRL-I、'{A-Z0-9} 或 `{A-Z0-9} 命令转到别的文件时亦然。
-"set autoindent		    	" 设置自动对齐(缩进)：即每行的缩进值与上一行相等；使用 noautoindent 取消设置
+"set autoindent
 set smartindent         	" 智能对齐方式
 set cindent		        	" 使用 C/C++ 语言的自动缩进方式
-"设置C/C++语言的具体缩进方式
-set cinoptions={0,1s,t0,n-2,p2s,(03s,=.5s,>1s,=1s,:0,g0,N-s
+"c缩进方式
+"set cinoptions=f0,{0,t0,:1s,i1s,n-2,p0,c3,(0,U1,=1s,>1s,=1s,g0,N-s
+set cinoptions=>1s,e0,n0,f0,{0,}0,^0,L-1,:1s,=1s,l0,b0,t0,p0,c3,(0,U1,M0,m0
+"cpp缩进方式
+set cinoptions+=g0,h1s,N0,i1s
+"js缩进方式
+set cinoptions+=j1,J1,)50,*100
 "set backspace=2	    	" 设置退格键可用
 set showmatch		    	" 设置匹配模式，显示匹配的括号
 set linebreak		    	" 整词换行
@@ -191,7 +198,7 @@ set number	    	    	" 显示行号
 "set previewwindow	    	" 标识预览窗口
 set history=50		    	" set command history to 200
 
-set noexpandtab			    " 制表符是否扩展为空格
+set expandtab			    " 制表符是否扩展为空格
 set tabstop=4			    " 制表符(tab键)的宽度
 set softtabstop=4		    " 软制表符的宽度
 set shiftwidth=4		    " 换行缩进
@@ -236,15 +243,34 @@ set cmdheight=1
 set modeline
 "------------------------------------------------------------------
 
-autocmd BufNewFile,BufReadPost, * exec ":call Main()"
+autocmd BufNewFile,BufReadPost, * call Main()
+
+let s:f_mapkey = 0
 
 function! Main()
     call InitCommPlugins()
     call InitUI()
     call MapKeys()
+	call AddAus()
     call AutoComplete()
 endfunc
 
+function! AddAus()
+    autocmd FileReadPre   * normal mz
+    autocmd FileReadPost  * normal 'z
+    
+    let l:ft = &filetype
+
+    if strlen(l:ft) == 0
+        autocmd FileReadPost *.c,*.cpp,*.h set ft=cpp|call AutoComplete()
+        autocmd FileReadPost *.js          set ft=javascript|call AutoComplete()
+        autocmd FileReadPost *.html        set ft=html|call AutoComplete()
+        autocmd FileReadPost *.css         set ft=css|call AutoComplete()
+        autocmd FileReadPost *.less        set ft=less|call AutoComplete()
+        autocmd FileReadPost *.json        set ft=json|call AutoComplete()
+    endif
+
+endfunc
 
 function! AsynChecker()
     "ale
@@ -317,33 +343,57 @@ endfunc
 
 function! AutoComplete()
 
+    let l:ft = &filetype
+    
+    if strlen(l:ft) == 0
+        "call ReContext()
+        
+        "path complete only
+        inoremap <C-j> <C-x><C-f>
+
+        let s:f_mapkey = 1
+
+        return 0
+    endif
+
     call AsynChecker()
     call YCM()
 
-    let l:ft = &filetype
 
-    if strlen(l:ft) == 0
-        "call ReContext()
-    elseif l:ft ==? 'sh'
+    if l:ft ==? 'sh'
+
         call setline(1, "\#!/bin/bash")
         normal o
         normal o
         normal G
+
     elseif match(l:ft, 'css\|less') > -1
+
         call SetIndent(2)
         call CompleteCSS()
+
     elseif l:ft == 'html'
+
         call SetIndent(2)
         call CompleteHTML()
+
     elseif l:ft == 'js'
+
         call CompleteJS()
+
     elseif l:ft == 'json'
+
         call CompleteJSON()
+        
     elseif match(l:ft, 'c\|cpp\|h') > -1
+
         call CompleteC()
         call SetTags()
+
     elseif l:ft == 'php'
+
         call CompletePHP()
+
     endif
 
 endfunc
@@ -452,7 +502,6 @@ function! SetTags()
 endfunc
 
 function! YCM()
-    "YCM
     " 输入第一个字符就开始补全
     let g:ycm_min_num_of_chars_for_completion = 1
 
@@ -491,9 +540,12 @@ function! YCM()
     " 离开插入模式后自动关闭预览窗口
     autocmd InsertLeave * if pumvisible() == 0|pclose|end
 
+    if s:f_mapkey
+        iunmap   <C-j>
+        s:f_mapkey = 0
+    endif
     " 全能补全和路径补全
     inoremap <C-j> <C-x><C-o>
-    "inoremap <C-k> <C-x><C-i>
 
     " 回车即选中当前项
     inoremap <expr> <CR>  pumvisible() ? "\<C-y>" : "\<CR>"
@@ -661,6 +713,10 @@ endfunc
 
 
 function! CompleteJS()
+	"iangmiao/simple-javascript-indenter
+	let g:SimpleJsIndenter_BriefMode = 1
+
+
     "javascript-libraries-syntax
     "Support libs id:
     "jQuery: jquery
@@ -908,3 +964,4 @@ function! SetTheme()
     colorscheme solarized8_dark
 endfunc
 
+" vim: set ai sts=4 ts=4 sw=4:
