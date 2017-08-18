@@ -48,7 +48,7 @@ Plugin 'w0rp/ale'
 
 "-------------------Bash------------------------------
 "Write and run BASH-scripts using menus and hotkeys.
-Plugin 'vim-scripts/bash-support.vim'
+"Plugin 'vim-scripts/bash-support.vim'
 "-------------------Bash------------------------------
 
 "-------------------CPP------------------------------
@@ -365,7 +365,6 @@ function! AutoComplete()
         call setline(1, "\#!/bin/bash")
         normal o
         normal o
-        normal G
 
     elseif match(l:ft, 'css\|less') > -1
 
