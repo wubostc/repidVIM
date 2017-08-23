@@ -203,8 +203,7 @@ set tabstop=4			    " 制表符(tab键)的宽度
 set softtabstop=4		    " 软制表符的宽度
 set shiftwidth=4		    " 换行缩进
 
-" 总显示最后一个窗口的状态行；设为1则窗口数多于一个的时候显示最后一个窗口的状态行；0不显示最后一个窗口的状态行
-set laststatus=1
+set laststatus=2            " statebar airline
 
 "标尺，用于显示光标位置的行号和列号，逗号分隔。每个窗口都有自己的标尺。如果窗口有状态行，标尺在那里显示。否则，它显示在屏幕的最后一行上。
 set ruler
@@ -251,26 +250,32 @@ function! Main()
     call InitCommPlugins()
     call InitUI()
     call MapKeys()
-	call AddAus()
+    call AddEventListener()
     call AutoComplete()
 endfunc
 
-function! AddAus()
+function! AddEventListener()
+    " :read path/filename
     autocmd FileReadPre   * normal mz
     autocmd FileReadPost  * normal 'z
-    
+
     let l:ft = &filetype
 
     if strlen(l:ft) == 0
-        autocmd FileReadPost *.c,*.cpp,*.h set ft=cpp|call AutoComplete()
-        autocmd FileReadPost *.js          set ft=javascript|call AutoComplete()
-        autocmd FileReadPost *.html        set ft=html|call AutoComplete()
-        autocmd FileReadPost *.css         set ft=css|call AutoComplete()
-        autocmd FileReadPost *.less        set ft=less|call AutoComplete()
-        autocmd FileReadPost *.json        set ft=json|call AutoComplete()
+        " :set ft=???
+        autocmd FileType * call AutoComplete()
+
+        autocmd FileReadPost *.c,*.cpp,*.h set ft=cpp
+        autocmd FileReadPost *.js          set ft=javascript
+        autocmd FileReadPost *.html        set ft=html
+        autocmd FileReadPost *.css         set ft=css
+        autocmd FileReadPost *.less        set ft=less
+        autocmd FileReadPost *.json        set ft=json
     endif
 
 endfunc
+
+
 
 function! AsynChecker()
     "ale
@@ -329,6 +334,14 @@ function! MapKeys()
     nnoremap <Leader><tab> :tabnext<CR>
     nnoremap <Leader><Leader><Tab> :bnext<CR>
 
+    inoremap <C-s> <Esc>:w<CR>
+    nnoremap <C-s> :w<CR>
+
+        "try
+            "iunmap   <C-s>
+        "catch /E31:/
+            "nothing...
+        "endtry
 endfunc
 
 " 让配置变更立即生效
@@ -345,9 +358,9 @@ function! AutoComplete()
 
     let l:ft = &filetype
     
-    if strlen(l:ft) == 0
+    if strlen(l:ft) == 0 && s:f_mapkey == 0
         "call ReContext()
-        
+
         "path complete only
         inoremap <C-j> <C-x><C-f>
 
@@ -360,7 +373,7 @@ function! AutoComplete()
     call YCM()
 
 
-    if l:ft ==? 'sh'
+    if l:ft == 'sh'
 
         call setline(1, "\#!/bin/bash")
         normal o
@@ -540,8 +553,11 @@ function! YCM()
     autocmd InsertLeave * if pumvisible() == 0|pclose|end
 
     if s:f_mapkey
-        iunmap   <C-j>
-        s:f_mapkey = 0
+        try
+            iunmap   <C-j>
+        catch /E31:/
+            "nothing...
+        endtry
     endif
     " 全能补全和路径补全
     inoremap <C-j> <C-x><C-o>
@@ -579,7 +595,7 @@ function! YCM()
                 \   'lua' : ['.', ':'],
                 \   'erlang' : [':'],
                 \   'haskell' : ['.', 're!.'],
-                \   'scss,css': [ 're!^\s{2,4}', 're!:\s+' ],
+                \   'less,css': [ 're!^\s{2,4}', 're!:\s+' ],
                 \ }
 endfunc
 
@@ -589,6 +605,7 @@ function! InitStatebar()
     let g:airline#extension#ycm#enabled = 1
     let g:airline#extension#ycm#error_symbol = 'E:'
     let g:airline#extension#ycm#warning_symbol = 'W:'
+    let g:airline#extensions#tabline#enabled = 1
     let g:airline#extensions#tabline#buffer_nr_show = 1
 
     "airline-theme
@@ -856,9 +873,9 @@ function! CompleteHTML()
                 \        },
                 \        'default_attributes': {
                 \            'a': {'href': ''},
-                \            'meta': [{'name': 'viewport'},{'content': 'width=device-width, initial-scale=1.0'}],
+                \            'meta': [{'name': 'viewport'}, {'content': 'width=device-width, initial-scale=1.0'}],
                 \            'link': [{'rel': 'stylesheet'}, {'href': ''}],
-                \            'script':    {'type': 'text/javascript'},
+                \            'script': {'type': 'text/javascript'},
                 \            'img': [{'src': ''}, {'alt': 'loading'}],
                 \        },
                 \        'aliases': {
