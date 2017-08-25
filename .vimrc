@@ -242,7 +242,7 @@ set cmdheight=1
 set modeline
 "------------------------------------------------------------------
 
-autocmd BufNewFile,BufReadPost, * call Main()
+autocmd BufNewFile,BufReadPost *    call Main()
 
 let s:f_mapkey = 0
 
@@ -259,6 +259,9 @@ function! AddEventListener()
     autocmd FileReadPre   * normal mz
     autocmd FileReadPost  * normal 'z
 
+    autocmd! BufWritePre,FileWritePre *.* call DelWhitespace()
+
+    "autocmd! QuitPre * call QuitPre()
     let l:ft = &filetype
 
     if strlen(l:ft) == 0
@@ -275,6 +278,15 @@ function! AddEventListener()
 
 endfunc
 
+function! DelWhitespace()
+    "if confirm("trim whitespace?","&yes\n&no",2,"Question") == 1
+    try
+        exec "%s/\\s\\+$//g"
+    catch /E486:/
+        "nothing...
+    endtry
+    "endif
+endfunc
 
 
 function! AsynChecker()
@@ -337,11 +349,11 @@ function! MapKeys()
     inoremap <C-s> <Esc>:w<CR>
     nnoremap <C-s> :w<CR>
 
-        "try
-            "iunmap   <C-s>
-        "catch /E31:/
-            "nothing...
-        "endtry
+    "try
+    "iunmap   <C-s>
+    "catch /E31:/
+    "nothing...
+    "endtry
 endfunc
 
 " 让配置变更立即生效
@@ -357,7 +369,7 @@ endfunc
 function! AutoComplete()
 
     let l:ft = &filetype
-    
+
     if strlen(l:ft) == 0 && s:f_mapkey == 0
         "call ReContext()
 
@@ -396,7 +408,7 @@ function! AutoComplete()
     elseif l:ft == 'json'
 
         call CompleteJSON()
-        
+
     elseif match(l:ft, 'c\|cpp\|h') > -1
 
         call CompleteC()
@@ -559,6 +571,9 @@ function! YCM()
             "nothing...
         endtry
     endif
+    "if hasmapto('<C-x><C-f>', 'i')
+    "iunmap <C-j>
+    "endif
     " 全能补全和路径补全
     inoremap <C-j> <C-x><C-o>
 
@@ -729,8 +744,8 @@ endfunc
 
 
 function! CompleteJS()
-	"iangmiao/simple-javascript-indenter
-	let g:SimpleJsIndenter_BriefMode = 1
+    "iangmiao/simple-javascript-indenter
+    let g:SimpleJsIndenter_BriefMode = 1
 
 
     "javascript-libraries-syntax
