@@ -6,7 +6,7 @@
 " Desc:
 "==========================================
 
-set nocompatible              " be iMproved, required
+set nocompatible              " be improved, required
 filetype off                  " required
 
 " set the runtime path to include Vundle and initialize
@@ -242,11 +242,16 @@ set cmdheight=1
 set modeline
 "------------------------------------------------------------------
 
-autocmd BufNewFile,BufReadPost *    call Main()
+autocmd BufReadPost  *      call Main(0)
+autocmd BufNewFile   *.*    call Main(1)
+
 
 let s:f_mapkey = 0
 
-function! Main()
+function! Main(args_)
+    if a:args_ != 0
+        call AddHeader()
+    endif
     call InitCommPlugins()
     call InitUI()
     call MapKeys()
@@ -254,10 +259,22 @@ function! Main()
     call AutoComplete()
 endfunc
 
+function! AddHeader()
+    let l:ft = &filetype
+
+    if l:ft == 'python'
+        call setline(1, '# -*- coding: utf-8 -*-')
+        call setline(2, '')
+        call setline(3, '"""   """')
+        call setpos('.', [0, 3, 5, 0])
+    endif
+    "set insertmode
+endfunc
+
 function! AddEventListener()
     " :read path/filename
-    autocmd FileReadPre   * normal mz
-    autocmd FileReadPost  * normal 'z
+    autocmd! FileReadPre   * normal mz
+    autocmd! FileReadPost  * normal 'z
 
     autocmd! BufWritePre,FileWritePre *.* call DelWhitespace()
 
@@ -274,6 +291,7 @@ function! AddEventListener()
         autocmd FileReadPost *.css         set ft=css
         autocmd FileReadPost *.less        set ft=less
         autocmd FileReadPost *.json        set ft=json
+        autocmd FileReadPost *.py          set ft=python
     endif
 
 endfunc
@@ -297,6 +315,7 @@ function! AsynChecker()
     let g:ale_echo_msg_error_str = 'E'
     let g:ale_echo_msg_warning_str = 'W'
     let g:ale_statusline_format = ['✘ %d', '⚠ %d', '⬥ ok']
+    let g:airline#extensions#ale#enabled = 1
 
     let g:ale_html_htmlhint_executable = 'htmlhint'
 
@@ -319,6 +338,12 @@ function! AsynChecker()
     "Installing:
     "   apt-get install vim-vint
     let g:ale_vim_vint_show_style_issues = 1
+
+    "Installing:
+    "   apt install pylint3
+    let g:ale_python_pylint_executable = 'pylint3'
+    "pylint3 --generate-rcfile
+    "let g:ale_python_pylint_options = '-rcfile /path/to/pylint.rc'
 endfunc
 
 
@@ -391,7 +416,7 @@ function! AutoComplete()
         normal o
         normal o
 
-    elseif match(l:ft, 'css\|less') > -1
+    elseif match(l:ft, 'css$\|less$') > -1
 
         call SetIndent(2)
         call CompleteCSS()
@@ -409,7 +434,7 @@ function! AutoComplete()
 
         call CompleteJSON()
 
-    elseif match(l:ft, 'c\|cpp\|h') > -1
+    elseif match(l:ft, 'c$\|cpp$\|h$') > -1
 
         call CompleteC()
         call SetTags()
@@ -418,8 +443,11 @@ function! AutoComplete()
 
         call CompletePHP()
 
-    endif
+    elseif l:ft == 'python'
 
+        call CompletePython()
+
+    endif
 endfunc
 
 function! InitCommPlugins()
@@ -952,6 +980,9 @@ function! CompletePHP()
 
 endfunc
 
+function! CompletePython()
+    nnoremap <F5> :w !time python3 %<CR>
+endfunc
 
 
 "Yggdroot/indentLine
